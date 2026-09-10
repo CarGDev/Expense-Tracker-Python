@@ -12,4 +12,4 @@ expenses = "expenses.menu:main"
 
 [tool.setuptools.packages.find]
 where=["src"]
-include = ["expenses", "expense.*"]
+include = ["expenses", "expenses.*"]
