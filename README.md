@@ -1,25 +1,57 @@
-# Expense Tracker Application
+# Expense Tracker — Python Implementation
 
-Author: Carlos Gutierrez
+By **Carlos Gutierrez** — Semester 4, Week 3.
 
-## Project Overview
+> This repository implements the **Python track** of the assignment. The course assigns the same application in two languages to compare how each handles data structures, memory management, concurrency, and error handling.
 
-This Python 1 assignment implements a small expense tracker application. The goal is to compare how different programming languages handle the same core features, including data structures, memory management, concurrency, and error handling.
+## 1. Assignment Context
 
-## Core Requirements
+**Python 1 — Project Overview:** each group designs and implements an application with specific requirements in two assigned languages, emphasizing language-specific features.
 
-- Record expenses with a date, amount, category, and description.
-- View saved expenses.
-- Filter and search expenses by date range or category.
-- Show summary totals by category and overall.
+**Option 1 assigned here: Expense Tracker** — record, view, and categorize expenses; filter by date/category; calculate totals.
 
-## Python Focus
+The brief gives language examples:
 
-This version highlights Python features such as dictionaries for data storage, dynamic typing, the `datetime` library for date handling, and simple error handling for user input.
+* **Python:** `dict` storage, dynamic typing, `datetime`.
+* **C++:** `struct`/`class` for expenses, STL containers, explicit memory management.
 
-## Running The App
+This repo is the **Python implementation** — C++ counterpart: [CarGDev/Expense-Tracker-Cpp](https://github.com/CarGDev/Expense-Tracker-Cpp).
 
-Install the optional menu dependency if needed:
+## 2. Core Requirements
+
+* **Data storage** — expense with `date`, `amount`, `category`, `description` → `dict`-based records with `datetime` handling in `src/expenses/`
+* **Filter & search** — by date range and category/subcategory (via `textual` TUI filtering)
+* **Summary** — total by category and overall
+
+## 3. Python Highlights
+
+* Dynamic `dict` storage vs C++ strongly-typed `struct ExpenseRecord`
+* Dynamic typing and duck typing for flexible expense handling
+* `datetime` standard library for date parsing and range filtering
+* Simple, Pythonic error handling for user input validation
+* Terminal UI with `textual` (`src/expenses/menu.py:1`, `src/expenses/__main__.py:1`)
+
+## 4. Project Structure
+
+```
+src/
+  expenses/
+    __init__.py            # package entry, version
+    __main__.py            # python -m expenses entry point
+    cli.py                 # CLI placeholder / future extension
+    menu.py                # textual App, layout & bindings
+pyproject.toml             # setuptools config, textual optional dep [menu], entry point `expenses`
+LICENSE                    # MIT
+```
+
+## 5. Prerequisites
+
+* Python `>=3.10`, `pip`
+* Optional TUI dependency: `textual` (installed via `[menu]` extra)
+
+## 6. Install & Run
+
+Install with optional menu (TUI) dependency:
 
 ```bash
 pip install -e ".[menu]"
@@ -31,12 +63,21 @@ Run the application:
 python -m expenses
 ```
 
-Or, after installation:
+Or, after installation via entry point:
 
 ```bash
 expenses
 ```
 
-## License
+## 7. Usage (TUI)
 
-This project is licensed under the MIT License. See `LICENSE` for details.
+* `textual` app defined in `src/expenses/menu.py:5` (`Expenses` App)
+* Header/Footer chrome with title `Expense Tracker`
+* `q` — quit application (`BINDINGS` in `src/expenses/menu.py:8`)
+* Welcome screen placeholder — extend `compose()` to add add/filter/summary views to match the C++ TUI feature parity
+
+> The C++ version provides a full `ncurses` layout with `add_expense` / `get_expenses` / `remove_expenses` flows; the Python `textual` implementation mirrors the same workflows idiomatically — add this parity as the app evolves.
+
+## 8. License
+
+MIT © 2026 Carlos Gutierrez — see [LICENSE](./LICENSE).
