@@ -2,21 +2,18 @@ from textual.app import App, ComposeResult
 from textual.containers import Horizontal, Vertical
 from textual.widgets import Button, DataTable, Footer, Header, Static
 
-from expenses.memory.core import ExpenseMemory, ExpenseRecord, parse_yyyy_mm_dd
+from expenses.constants.app import BINDINGS, CSS_PATH, SUB_TITLE, TITLE
+from expenses.memory.core import ExpenseMemory
+from expenses.memory.types import ExpenseRecord
+from expenses.memory.utils import parse_yyyy_mm_dd
 from expenses.tui.screens import AddExpenseScreen, FilterExpenseScreen
 
 
 class Expenses(App[None]):
-    TITLE = "Expense Tracker"
-    SUB_TITLE = "Welcome to expense tracker"
-    CSS_PATH = "app.tcss"
-    BINDINGS = [
-        ("q", "quit", "Quit application"),
-        ("a", "add_expense", "Add expense"),
-        ("d", "delete_expense", "Delete expense"),
-        ("f", "filter_expenses", "Filter expenses"),
-        ("space", "toggle_selected_row", "Select row"),
-    ]
+    BINDINGS = BINDINGS
+    CSS_PATH = CSS_PATH
+    SUB_TITLE = SUB_TITLE
+    TITLE = TITLE
 
     def __init__(self) -> None:
         super().__init__()

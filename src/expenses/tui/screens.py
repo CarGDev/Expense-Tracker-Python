@@ -5,7 +5,8 @@ from textual.screen import ModalScreen
 from textual.widgets import Button, Input, Select, Static
 
 from expenses.categories import CATEGORIES
-from expenses.memory.core import ExpenseRecord, parse_yyyy_mm_dd
+from expenses.memory.types import ExpenseRecord
+from expenses.memory.utils import parse_yyyy_mm_dd
 
 
 class AddExpenseScreen(ModalScreen[ExpenseRecord | None]):
