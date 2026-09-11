@@ -33,9 +33,9 @@ class Expenses(App[None]):
                     id="expenses-summary",
                 ),
                 Horizontal(
-                    Button("󰐕 Add", id="add", variant="success"),
-                    Button("󰈲 Filter", id="filter", variant="primary"),
-                    Button("󰆴 Delete", id="delete", variant="error", classes="hidden"),
+                    Button("󰐕", id="add", variant="success"),
+                    Button("󰈲", id="filter", variant="primary"),
+                    Button("󰆴", id="delete", variant="error", classes="hidden"),
                     id="action-row",
                 ),
                 id="summary-action-row",
@@ -179,9 +179,9 @@ class Expenses(App[None]):
     def update_filter_button(self) -> None:
         filter_button = self.query_one("#filter", Button)
         if self.active_records is None:
-            filter_button.label = "󰈲 Filter"
+            filter_button.label = "󰈲"
         else:
-            filter_button.label = "󰃢 Clear"
+            filter_button.label = "󰃢"
 
     def update_delete_button(self) -> None:
         delete_button = self.query_one("#delete", Button)
