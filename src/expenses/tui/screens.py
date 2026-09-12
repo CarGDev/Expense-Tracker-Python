@@ -1,4 +1,6 @@
-from textual import on
+import re
+
+from textual import events, on
 from textual.app import ComposeResult
 from textual.containers import Horizontal, Vertical
 from textual.screen import ModalScreen
@@ -25,7 +27,10 @@ class AddExpenseScreen(ModalScreen[ExpenseRecord | None]):
             ),
             Static("Subcategory"),
             Select(
-                [(subcategory, subcategory) for subcategory in CATEGORIES[first_category]],
+                [
+                    (subcategory, subcategory)
+                    for subcategory in CATEGORIES[first_category]
+                ],
                 value=CATEGORIES[first_category][0],
                 id="subcategory-select",
             ),
@@ -52,6 +57,81 @@ class AddExpenseScreen(ModalScreen[ExpenseRecord | None]):
         )
         subcategory_select.value = subcategories[0]
 
+    @on(Input.Blurred, "#date-input")
+    def date_input_blurred(self, event: Input) -> None:
+        raw_value = event.input.value.replace("-", "").strip()
+
+        if not raw_value:
+            return
+
+        digits = ""
+
+        for char in raw_value:
+            if char.isdigit():
+                if len(digits) < 8:
+                    digits += char
+                else:
+                    event.input.value = ""
+                    self.notify("Date cannot be more than 8 digits", severity="error")
+                    return
+            else:
+                event.input.value = ""
+                self.notify("Only numbers are valid for date", severity="error")
+                return
+
+        if len(digits) != 8:
+            event.input.value = ""
+            self.notify("Date must be 8 digits: YYYYMMDD", severity="error")
+            return
+
+        formatted_date = f"{digits[:4]}-{digits[4:6]}-{digits[6:]}"
+
+        if parse_yyyy_mm_dd(formatted_date) is None:
+            event.input.value = ""
+            self.notify("Date is not valid", severity="error")
+            return
+
+        event.input.value = formatted_date
+
+    def on_focus(self, event: Input.Focused) -> None:
+        if event.widget.id != "date-input":
+            return
+
+        date_input = self.query_one("#date-input", Input)
+        date_input.value = date_input.value.replace("-", "")
+
+    @on(Input.Blurred, "#amount-input")
+    def amount_input_blurred(self, event: Input) -> None:
+        raw_value = event.input.value.replace("$", "").strip()
+
+        if not raw_value:
+            event.input.value = ""
+            return
+
+        dollars, _, cents = raw_value.partition(".")
+        if not dollars:
+            dollars = "0"
+
+        cents = cents[:2].ljust(2, "0")
+        event.input.value = f"${dollars}.{cents}"
+
+    @on(Input.Changed, "#amount-input")
+    def update_input(self, event: Input) -> None:
+        raw_value = event.value.replace("$", "")
+
+        cleaned = ""
+        has_decimal = False
+
+        for char in raw_value:
+            if char.isdigit():
+                cleaned += char
+            elif char == "." and not has_decimal:
+                cleaned += char
+                has_decimal = True
+
+        if event.input.value != cleaned:
+            event.input.value = cleaned
+
     def on_button_pressed(self, event: Button.Pressed) -> None:
         if event.button.id == "cancel-expense":
             self.dismiss(None)
@@ -63,7 +143,7 @@ class AddExpenseScreen(ModalScreen[ExpenseRecord | None]):
         category = str(self.query_one("#category-select", Select).value)
         subcategory = str(self.query_one("#subcategory-select", Select).value)
         date = self.query_one("#date-input", Input).value.strip()
-        amount = self.query_one("#amount-input", Input).value.strip()
+        amount = self.query_one("#amount-input", Input).value.strip().replace("$", "")
 
         if not date or not amount:
             self.notify("Date and amount are required", severity="error")
@@ -101,7 +181,8 @@ class FilterExpenseScreen(ModalScreen[ExpenseRecord | None]):
             Input(placeholder="YYYY-MM-DD", id="to-date-input"),
             Static("Category"),
             Select(
-                [("All", "")] + [(category.title(), category) for category in CATEGORIES],
+                [("All", "")]
+                + [(category.title(), category) for category in CATEGORIES],
                 value="",
                 id="filter-category-select",
             ),
@@ -131,7 +212,8 @@ class FilterExpenseScreen(ModalScreen[ExpenseRecord | None]):
         category = str(event.value)
         subcategories = CATEGORIES[category]
         subcategory_select.set_options(
-            [("All", "")] + [(subcategory, subcategory) for subcategory in subcategories]
+            [("All", "")]
+            + [(subcategory, subcategory) for subcategory in subcategories]
         )
         subcategory_select.value = ""
 
@@ -146,7 +228,9 @@ class FilterExpenseScreen(ModalScreen[ExpenseRecord | None]):
         date_from = self.query_one("#from-date-input", Input).value.strip()
         date_to = self.query_one("#to-date-input", Input).value.strip()
         category = str(self.query_one("#filter-category-select", Select).value or "")
-        subcategory = str(self.query_one("#filter-subcategory-select", Select).value or "")
+        subcategory = str(
+            self.query_one("#filter-subcategory-select", Select).value or ""
+        )
 
         if date_from and parse_yyyy_mm_dd(date_from) is None:
             self.notify("From date must use YYYY-MM-DD", severity="error")
