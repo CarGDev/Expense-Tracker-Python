@@ -217,6 +217,50 @@ class FilterExpenseScreen(ModalScreen[ExpenseRecord | None]):
         )
         subcategory_select.value = ""
 
+    def on_focus(self, event: events.Focus) -> None:
+        if event.widget.id not in {"from-date-input", "to-date-input"}:
+            return
+
+        date_input = self.query_one(f"#{event.widget.id}", Input)
+        date_input.value = date_input.value.replace("-", "")
+
+    @on(Input.Blurred, "#from-date-input")
+    @on(Input.Blurred, "#to-date-input")
+    def filter_date_input_blurred(self, event: Input.Blurred) -> None:
+        raw_value = event.input.value.replace("-", "").strip()
+
+        if not raw_value:
+            return
+
+        digits = ""
+
+        for char in raw_value:
+            if char.isdigit():
+                if len(digits) < 8:
+                    digits += char
+                else:
+                    event.input.value = ""
+                    self.notify("Date cannot be more than 8 digits", severity="error")
+                    return
+            else:
+                event.input.value = ""
+                self.notify("Only numbers are valid for date", severity="error")
+                return
+
+        if len(digits) != 8:
+            event.input.value = ""
+            self.notify("Date must be 8 digits: YYYYMMDD", severity="error")
+            return
+
+        formatted_date = f"{digits[:4]}-{digits[4:6]}-{digits[6:]}"
+
+        if parse_yyyy_mm_dd(formatted_date) is None:
+            event.input.value = ""
+            self.notify("Date is not valid", severity="error")
+            return
+
+        event.input.value = formatted_date
+
     def on_button_pressed(self, event: Button.Pressed) -> None:
         if event.button.id == "cancel-filter":
             self.dismiss(None)
